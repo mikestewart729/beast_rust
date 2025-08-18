@@ -2,6 +2,12 @@ use rand::Rng;
 
 use crate::{BOARD_HEIGHT, BOARD_WIDTH, Coord, Direction, Tile, board::Board};
 
+pub enum AdvanceEffect {
+    Stay,
+    MoveIntoTile(Coord),
+    MoveAndPushBlock { player_to: Coord, block_to: Coord },
+}
+
 #[derive(Debug)]
 pub struct Player {
     pub position: Coord,
@@ -53,15 +59,17 @@ impl Player {
         Some(next_position)
     }
 
-    pub fn advance(&mut self, board: &mut Board, direction: &Direction) {
+    pub fn advance(
+        &mut self,
+         board: &mut Board,
+          direction: &Direction
+    ) -> AdvanceEffect {
         if let Some(first_position) = 
             Self::get_next_position(self.position, direction) 
         {
             match board[&first_position] {
-                Tile::Empty => {
-                    board[&self.position] = Tile::Empty;
-                    self.position = first_position;
-                    board[&first_position] = Tile::Player;
+                Tile::Empty | Tile::CommonBeast => {
+                    AdvanceEffect::MoveIntoTile(first_position)
                 },
                 Tile::Block => {
                     let mut current_tile = Tile::Block;
@@ -77,27 +85,30 @@ impl Player {
                             match current_tile {
                                 Tile::Block => { /* Continue Looking */},
                                 Tile::Empty => {
-                                    board[&self.position] = Tile::Empty;
-                                    self.position = first_position;
-                                    board[&first_position] = Tile::Player;
-                                    board[&current_position] = Tile::Block;
+                                    return AdvanceEffect::MoveAndPushBlock {
+                                        player_to: first_position,
+                                        block_to: current_position,
+                                    };
                                 },
-                                Tile::StaticBlock | Tile::Player | Tile::CommonBeast => { break; },
+                                Tile::StaticBlock | Tile::Player | Tile::CommonBeast => {
+                                    return AdvanceEffect::Stay;
+                                 },
                             }
                         } else {
-                            break;
+                            return AdvanceEffect::Stay;
                         }
                     }
+
+                    AdvanceEffect::Stay
                 },
-                Tile::Player | Tile::StaticBlock => {},
-                Tile::CommonBeast => {
-                    todo!("The player ran into a beast and died");
-                },
-            }
+                Tile::Player | Tile::StaticBlock => AdvanceEffect::Stay,
+            } 
+        } else {
+            AdvanceEffect::Stay
         }
     }
 
-    pub fn respawn(&mut self, board: &mut Board) {
+    pub fn respawn(&mut self, board: &Board) -> Coord {
         let mut new_position = self.position;
 
         let mut rng = rand::rng();
@@ -108,7 +119,6 @@ impl Player {
             };
         }
 
-        self.position = new_position;
-        board[&new_position] = Tile::Player;
+        new_position
     }
 }

@@ -14,7 +14,7 @@ use crate::{
     beasts::{Beast, CommonBeast},
     board::Board, 
     levels::Level, 
-    player::Player
+    player::{Player, AdvanceEffect},
 };
 
 #[derive(Debug)]
@@ -56,24 +56,45 @@ impl Game {
 
         'game_loop: loop {
             if let Ok(byte) = self.input_receiver.try_recv() {
-                match byte as char {
+                let advance_effect = match byte as char {
                     'w' => {
-                        self.player.advance(&mut self.board, &Direction::Up);
+                        self.player.advance(&mut self.board, &Direction::Up)
                     },
                     'd' => {
-                        self.player.advance(&mut self.board, &Direction::Right);
+                        self.player.advance(&mut self.board, &Direction::Right)
                     },
                     's' => {
-                        self.player.advance(&mut self.board, &Direction::Down);
+                        self.player.advance(&mut self.board, &Direction::Down)
                     },
                     'a' => {
-                        self.player.advance(&mut self.board, &Direction::Left);
+                        self.player.advance(&mut self.board, &Direction::Left)
                     },
                     'q' => {
                         println!("Goodbye!");
-                        break;
+                        return;
                     },
-                    _ => {},
+                    _ => AdvanceEffect::Stay,
+                };
+
+                match advance_effect {
+                    AdvanceEffect::Stay => {},
+                    AdvanceEffect::MoveIntoTile(player_position) => {
+                        if self.board[&player_position] == Tile::CommonBeast {
+                            todo!("The player ran into a beast and died!");
+                        }
+                        self.board[&self.player.position] = Tile::Empty;
+                        self.player.position = player_position;
+                        self.board[&self.player.position] = Tile::Player;
+                    },
+                    AdvanceEffect::MoveAndPushBlock {
+                        player_to,
+                        block_to,
+                    } => {
+                        self.board[&self.player.position] = Tile::Empty;
+                        self.player.position = player_to;
+                        self.board[&self.player.position] = Tile::Player;
+                        self.board[&block_to] = Tile::Block;
+                    },
                 }
 
                 println!("{}", self.render(true));
@@ -100,7 +121,9 @@ impl Game {
                                     println!("Game Over!");
                                     break 'game_loop;
                                 } else {
-                                    self.player.respawn(&mut self.board);
+                                    let new_position = self.player.respawn(&self.board);
+                                    self.player.position = new_position;
+                                    self.board[&self.player.position] = Tile::Player;
                                 }
                             },
                             _ => {},
