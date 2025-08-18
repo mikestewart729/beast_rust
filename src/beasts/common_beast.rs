@@ -15,6 +15,12 @@ impl Beast for CommonBeast {
         board: &Board,
         player_position: &Coord,
     ) -> Option<Coord> {
+        let mut next_position = self.position;
+        if next_position.column > 0 {
+            next_position.column -= 1;
+            return Some(next_position);
+        }
+
         None
     }
 }

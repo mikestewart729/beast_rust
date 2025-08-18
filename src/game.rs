@@ -1,4 +1,9 @@
-use std::io::{Read, stdin};
+use std::{
+    io::{Read, stdin},
+    sync::mpsc,
+    thread,
+    time::{Duration, Instant},
+};
 
 use crate::{
     BOARD_HEIGHT, 
@@ -17,16 +22,30 @@ pub struct Game{
     player: Player,
     level: Level,
     beasts: Vec<CommonBeast>,
+    input_receiver: mpsc::Receiver<u8>,
 }
 
 impl Game {
     pub fn new() -> Self {
         let (board, beasts) = Board::new();
+        let (input_sender, input_receiver) = mpsc::channel::<u8>();
+        let stdin = stdin();
+        thread::spawn(move || {
+            let mut lock = stdin.lock();
+            let mut buffer = [0_u8; 1];
+            while lock.read_exact(&mut buffer).is_ok() {
+                if input_sender.send(buffer[0]).is_err() {
+                    break;
+                }
+            }
+        });
+
         Self {
             board,
             player: Player::new(),
             level: Level::One,
             beasts,
+            input_receiver,
         }
     }
 
@@ -36,28 +55,30 @@ impl Game {
         let mut buffer = [0_u8; 1];
         println!("{}", self.render(false));
 
-        while lock.read_exact(&mut buffer).is_ok() {
-            match buffer[0] as char {
-                'w' => {
-                    self.player.advance(&mut self.board, &Direction::Up);
-                },
-                'd' => {
-                    self.player.advance(&mut self.board, &Direction::Right);
-                },
-                's' => {
-                    self.player.advance(&mut self.board, &Direction::Down);
-                },
-                'a' => {
-                    self.player.advance(&mut self.board, &Direction::Left);
-                },
-                'q' => {
-                    println!("Goodbye!");
-                    break;
-                },
-                _ => {},
-            }
+        loop {
+            if let Ok(byte) = self.input_receiver.try_recv() {
+                match byte as char {
+                    'w' => {
+                        self.player.advance(&mut self.board, &Direction::Up);
+                    },
+                    'd' => {
+                        self.player.advance(&mut self.board, &Direction::Right);
+                    },
+                    's' => {
+                        self.player.advance(&mut self.board, &Direction::Down);
+                    },
+                    'a' => {
+                        self.player.advance(&mut self.board, &Direction::Left);
+                    },
+                    'q' => {
+                        println!("Goodbye!");
+                        break;
+                    },
+                    _ => {},
+                }
 
-            println!("{}", self.render(true));
+                println!("{}", self.render(true));
+            }
         }
     }
 
