@@ -76,7 +76,7 @@ impl Player {
                                     board[&first_position] = Tile::Player;
                                     board[&current_position] = Tile::Block;
                                 },
-                                Tile::StaticBlock | Tile::Player => { break; },
+                                Tile::StaticBlock | Tile::Player | Tile::CommonBeast => { break; },
                             }
                         } else {
                             break;
@@ -84,6 +84,9 @@ impl Player {
                     }
                 },
                 Tile::Player | Tile::StaticBlock => {},
+                Tile::CommonBeast => {
+                    todo!("The player ran into a beast and died");
+                },
             }
         }
     }

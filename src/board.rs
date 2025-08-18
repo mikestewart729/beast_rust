@@ -4,14 +4,16 @@ use std::ops::{Index, IndexMut};
 use crate::{
     ANSI_CYAN, 
     ANSI_GREEN, 
+    ANSI_RED,
     ANSI_RESET, 
     ANSI_YELLOW, 
     BOARD_HEIGHT, 
     BOARD_WIDTH, 
     Coord,
-    levels::{LevelConfig, Level},
     TILE_SIZE, 
     Tile,
+    beasts::{Beast, CommonBeast},
+    levels::{LevelConfig, Level},
 };
 
 #[derive(Debug)]
@@ -34,7 +36,7 @@ impl IndexMut<&Coord> for Board {
 }
 
 impl Board {
-    pub fn new() -> Self {
+    pub fn new() -> (Self, Vec<CommonBeast>) {
         let mut buffer = [[Tile::Empty; BOARD_WIDTH]; BOARD_HEIGHT];
 
         let mut all_coords = (0..BOARD_HEIGHT)
@@ -54,6 +56,7 @@ impl Board {
         let LevelConfig {
             block_count,
             static_block_count,
+            common_beast_count,
         } = Level::One.get_level_config();
 
         for _ in 0..block_count {
@@ -70,7 +73,16 @@ impl Board {
             buffer[coord.row][coord.column] = Tile::StaticBlock;
         }
 
-		Self { buffer }
+        let mut beasts = Vec::with_capacity(common_beast_count);
+        for _ in 0..common_beast_count {
+            let coord = all_coords.pop().expect(
+                "We tried to place more beasts than there were available spaces on the board",
+            );
+            buffer[coord.row][coord.column] = Tile::CommonBeast;
+            beasts.push(CommonBeast::new(coord));
+        }
+
+		(Self { buffer }, beasts)
     }
 
     pub fn render(&self) -> String {
@@ -92,6 +104,9 @@ impl Board {
                     },
                     Tile::StaticBlock => {
                         output.push_str(&format!("{ANSI_YELLOW}▓▓{ANSI_RESET}"))
+                    },
+                    Tile::CommonBeast => {
+                        output.push_str(&format!("{ANSI_RED}├┤{ANSI_RESET}"))
                     },
                 }
             }

@@ -5,6 +5,7 @@ use crate::{
     BOARD_WIDTH, 
     Direction, 
     TILE_SIZE, 
+    beasts::CommonBeast,
     board::Board, 
     levels::Level, 
     player::Player
@@ -15,14 +16,17 @@ pub struct Game{
     board: Board,
     player: Player,
     level: Level,
+    beasts: Vec<CommonBeast>,
 }
 
 impl Game {
     pub fn new() -> Self {
+        let (board, beasts) = Board::new();
         Self {
-            board: Board::new(),
+            board,
             player: Player::new(),
             level: Level::One,
+            beasts,
         }
     }
 
