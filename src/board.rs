@@ -9,6 +9,7 @@ use crate::{
     BOARD_HEIGHT, 
     BOARD_WIDTH, 
     Coord,
+    levels::{LevelConfig, Level},
     TILE_SIZE, 
     Tile,
 };
@@ -50,14 +51,19 @@ impl Board {
 
         buffer[0][0] = Tile::Player;
 
-        for _ in 0..50 {
+        let LevelConfig {
+            block_count,
+            static_block_count,
+        } = Level::One.get_level_config();
+
+        for _ in 0..block_count {
             let coord = all_coords.pop().expect(
                 "We tried to place more blocks than there are available spaces on the board",
             );
             buffer[coord.row][coord.column] = Tile::Block;
         }
 
-        for _ in 0..5 {
+        for _ in 0..static_block_count {
             let coord = all_coords.pop().expect(
                 "We tried to place more static blocks than there are available spaces on the board",
             );

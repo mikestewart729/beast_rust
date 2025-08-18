@@ -1,5 +1,6 @@
 mod board;
 mod game;
+mod levels;
 mod player;
 mod raw_mode;
 

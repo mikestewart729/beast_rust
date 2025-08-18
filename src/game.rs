@@ -1,11 +1,20 @@
 use std::io::{Read, stdin};
 
-use crate::{BOARD_HEIGHT, Direction, board::Board, player::Player};
+use crate::{
+    BOARD_HEIGHT, 
+    BOARD_WIDTH, 
+    Direction, 
+    TILE_SIZE, 
+    board::Board, 
+    levels::Level, 
+    player::Player
+};
 
 #[derive(Debug)]
 pub struct Game{
     board: Board,
     player: Player,
+    level: Level,
 }
 
 impl Game {
@@ -13,6 +22,7 @@ impl Game {
         Self {
             board: Board::new(),
             player: Player::new(),
+            level: Level::One,
         }
     }
 
@@ -20,7 +30,7 @@ impl Game {
         let stdin = stdin();
         let mut lock = stdin.lock();
         let mut buffer = [0_u8; 1];
-        println!("{}", self.board.render());
+        println!("{}", self.render(false));
 
         while lock.read_exact(&mut buffer).is_ok() {
             match buffer[0] as char {
@@ -43,7 +53,31 @@ impl Game {
                 _ => {},
             }
 
-            println!("\x1B[{}F{}", BOARD_HEIGHT + 1 + 1, self.board.render());
+            println!("{}", self.render(true));
         }
+    }
+
+    fn render(&self, reset: bool) -> String {
+        const BORDER_SIZE: usize = 1;
+        const FOOTER_SIZE: usize = 1;
+
+        let mut board = if reset {
+            format!(
+                "\x1B[{}F", 
+                BORDER_SIZE + BOARD_HEIGHT + BORDER_SIZE + FOOTER_SIZE 
+            )
+        } 
+        else { 
+            String::new() 
+        };
+        board.push_str(&format!(
+            "{board}\n{footer:>width$}{level}",
+            board = self.board.render(),
+            footer = "Level: ",
+            level = self.level,
+            width = BORDER_SIZE + BOARD_WIDTH * TILE_SIZE + BORDER_SIZE - FOOTER_SIZE,
+        ));
+
+        board
     }
 }
