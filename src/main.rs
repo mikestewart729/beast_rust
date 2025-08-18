@@ -1,6 +1,12 @@
+// Board Size constants
 const BOARD_WIDTH: usize = 39;
 const BOARD_HEIGHT: usize = 20;
 const TILE_SIZE: usize = 2;
+// ANSI color constants
+const ANSI_YELLOW: &str = "\x1B[33m";
+const ANSI_GREEN: &str = "\x1B[32m";
+const ANSI_CYAN: &str = "\x1B[36m";
+const ANSI_RESET: &str = "\x1B[39m";
 
 #[derive(Copy, Clone, Debug)]
 enum Tile {
@@ -29,21 +35,33 @@ impl Board {
     }
 
     fn render(&self) -> String {
-        let mut output = format!("▛{}▜\n", "▀".repeat(BOARD_WIDTH * TILE_SIZE));
+        let mut output = format!(
+            "{ANSI_YELLOW}▛{}▜{ANSI_RESET}\n", 
+            "▀".repeat(BOARD_WIDTH * TILE_SIZE)
+        );
 
         for rows in self.buffer {
-            output.push_str("▌");
+            output.push_str(&format!("{ANSI_YELLOW}▌{ANSI_RESET}"));
             for tile in rows {
                 match tile {
                     Tile::Empty => output.push_str("  "),
-                    Tile::Player => output.push_str("◀▶"),
-                    Tile::Block => output.push_str("░░"),
-                    Tile::StaticBlock => output.push_str("▓▓"),
+                    Tile::Player => {
+                        output.push_str(&format!("{ANSI_CYAN}◀▶{ANSI_RESET}"))
+                    },
+                    Tile::Block => {
+                        output.push_str(&format!("{ANSI_GREEN}░░{ANSI_RESET}"))
+                    },
+                    Tile::StaticBlock => {
+                        output.push_str(&format!("{ANSI_YELLOW}▓▓{ANSI_RESET}"))
+                    },
                 }
             }
-            output.push_str("▐\n");
+            output.push_str(&format!("{ANSI_YELLOW}▐{ANSI_RESET}\n"));
         }
-        output.push_str(&format!("▙{}▟", "▄".repeat(BOARD_WIDTH * TILE_SIZE)));
+        output.push_str(&format!(
+            "{ANSI_YELLOW}▙{}▟{ANSI_RESET}", 
+            "▄".repeat(BOARD_WIDTH * TILE_SIZE)
+        ));
 
         output
     }
