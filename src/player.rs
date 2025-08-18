@@ -2,7 +2,7 @@ use crate::{BOARD_HEIGHT, BOARD_WIDTH, Coord, Direction, Tile, board::Board};
 
 #[derive(Debug)]
 pub struct Player {
-    position: Coord,
+    pub position: Coord,
 }
 
 impl Player {

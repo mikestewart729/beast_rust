@@ -10,7 +10,8 @@ use crate::{
     BOARD_WIDTH, 
     Direction, 
     TILE_SIZE, 
-    beasts::CommonBeast,
+    Tile,
+    beasts::{Beast, CommonBeast},
     board::Board, 
     levels::Level, 
     player::Player
@@ -50,9 +51,7 @@ impl Game {
     }
 
     pub fn play(&mut self) {
-        let stdin = stdin();
-        let mut lock = stdin.lock();
-        let mut buffer = [0_u8; 1];
+        let mut last_tick = Instant::now();
         println!("{}", self.render(false));
 
         loop {
@@ -77,6 +76,28 @@ impl Game {
                     _ => {},
                 }
 
+                println!("{}", self.render(true));
+            }
+
+            if last_tick.elapsed() > Duration::from_millis(1000) {
+                last_tick = Instant::now();
+                for beast in self.beasts.iter_mut() {
+                    if let Some(new_position) = 
+                        beast.advance(&self.board, &self.player.position) 
+                    {
+                        match self.board[&new_position] {
+                            Tile::Empty => {
+                                self.board[&beast.position] = Tile::Empty;
+                                beast.position = new_position;
+                                self.board[&new_position] = Tile::CommonBeast;
+                            },
+                            Tile::Player => {
+                                todo!("The beast just killed the player");
+                            },
+                            _ => {},
+                        }
+                    }
+                }
                 println!("{}", self.render(true));
             }
         }
