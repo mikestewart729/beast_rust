@@ -1,12 +1,19 @@
+use std::io::{Read, stdin};
+
+mod board;
+mod raw_mode;
+
+use crate::{board::Board, raw_mode::RawMode};
+
 // Board Size constants
-const BOARD_WIDTH: usize = 39;
-const BOARD_HEIGHT: usize = 20;
-const TILE_SIZE: usize = 2;
+pub const BOARD_WIDTH: usize = 39;
+pub const BOARD_HEIGHT: usize = 20;
+pub const TILE_SIZE: usize = 2;
 // ANSI color constants
-const ANSI_YELLOW: &str = "\x1B[33m";
-const ANSI_GREEN: &str = "\x1B[32m";
-const ANSI_CYAN: &str = "\x1B[36m";
-const ANSI_RESET: &str = "\x1B[39m";
+pub const ANSI_YELLOW: &str = "\x1B[33m";
+pub const ANSI_GREEN: &str = "\x1B[32m";
+pub const ANSI_CYAN: &str = "\x1B[36m";
+pub const ANSI_RESET: &str = "\x1B[39m";
 
 #[derive(Copy, Clone, Debug)]
 enum Tile {
@@ -17,57 +24,49 @@ enum Tile {
 }
 
 #[derive(Debug)]
-struct Board {
-    buffer: [[Tile; BOARD_WIDTH]; BOARD_HEIGHT],
+struct Game{
+    board: Board,
 }
 
-impl Board {
+impl Game {
     fn new() -> Self {
-        let mut buffer = [[Tile::Empty; BOARD_WIDTH]; BOARD_HEIGHT];
-
-        buffer[0][0] = Tile::Player;
-		buffer[2][5] = Tile::Block;
-		buffer[2][6] = Tile::Block;
-		buffer[2][7] = Tile::Block;
-		buffer[3][6] = Tile::StaticBlock;
-
-		Self { buffer }
+        Self {
+            board: Board::new(),
+        }
     }
 
-    fn render(&self) -> String {
-        let mut output = format!(
-            "{ANSI_YELLOW}▛{}▜{ANSI_RESET}\n", 
-            "▀".repeat(BOARD_WIDTH * TILE_SIZE)
-        );
+    fn play(&self) {
+        let stdin = stdin();
+        let mut lock = stdin.lock();
+        let mut buffer = [0_u8; 1];
 
-        for rows in self.buffer {
-            output.push_str(&format!("{ANSI_YELLOW}▌{ANSI_RESET}"));
-            for tile in rows {
-                match tile {
-                    Tile::Empty => output.push_str("  "),
-                    Tile::Player => {
-                        output.push_str(&format!("{ANSI_CYAN}◀▶{ANSI_RESET}"))
-                    },
-                    Tile::Block => {
-                        output.push_str(&format!("{ANSI_GREEN}░░{ANSI_RESET}"))
-                    },
-                    Tile::StaticBlock => {
-                        output.push_str(&format!("{ANSI_YELLOW}▓▓{ANSI_RESET}"))
-                    },
-                }
+        while lock.read_exact(&mut buffer).is_ok() {
+            match buffer[0] as char {
+                'w' => {
+                    println!("Go up!");
+                },
+                'd' => {
+                    println!("Go right!");
+                },
+                's' => {
+                    println!("Go down!");
+                },
+                'a' => {
+                    println!("Go left!");
+                },
+                'q' => {
+                    println!("Goodbye!");
+                    break;
+                },
+                _ => {},
             }
-            output.push_str(&format!("{ANSI_YELLOW}▐{ANSI_RESET}\n"));
         }
-        output.push_str(&format!(
-            "{ANSI_YELLOW}▙{}▟{ANSI_RESET}", 
-            "▄".repeat(BOARD_WIDTH * TILE_SIZE)
-        ));
-
-        output
     }
 }
 
 fn main() {
-    let board = Board::new();
-    println!("{}", board.render());
+    let _raw_mode = RawMode::enter();
+
+    let game = Game::new();
+    game.play();
 }
