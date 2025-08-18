@@ -30,7 +30,7 @@ impl Player {
                 }
             },
             Direction::Left => {
-                if self.position.1 > 0 {
+                if self.position.0 > 0 {
                     self.position.0 -= 1
                 }
             },
