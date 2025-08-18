@@ -35,16 +35,16 @@ impl Game {
         while lock.read_exact(&mut buffer).is_ok() {
             match buffer[0] as char {
                 'w' => {
-                    self.player.advance(&mut self.board, Direction::Up);
+                    self.player.advance(&mut self.board, &Direction::Up);
                 },
                 'd' => {
-                    self.player.advance(&mut self.board, Direction::Right);
+                    self.player.advance(&mut self.board, &Direction::Right);
                 },
                 's' => {
-                    self.player.advance(&mut self.board, Direction::Down);
+                    self.player.advance(&mut self.board, &Direction::Down);
                 },
                 'a' => {
-                    self.player.advance(&mut self.board, Direction::Left);
+                    self.player.advance(&mut self.board, &Direction::Left);
                 },
                 'q' => {
                     println!("Goodbye!");

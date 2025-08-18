@@ -16,7 +16,7 @@ pub const ANSI_GREEN: &str = "\x1B[32m";
 pub const ANSI_CYAN: &str = "\x1B[36m";
 pub const ANSI_RESET: &str = "\x1B[39m";
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Tile {
     Empty,       // There will be empty spaces on our board "  "
     Player,      // We will need the player "◀▶"
