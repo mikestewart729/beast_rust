@@ -17,8 +17,27 @@ impl Board {
             buffer: [[Tile::Empty; 39]; 20],
         }
     }
+
+    fn render(&self) -> String {
+        let mut output = String::new();
+
+        for rows in self.buffer {
+            for tile in rows {
+                match tile {
+                    Tile::Empty => output.push_str("  "),
+                    Tile::Player => output.push_str("◀▶"),
+                    Tile::Block => output.push_str("░░"),
+                    Tile::StaticBlock => output.push_str("▓▓"),
+                }
+            }
+            output.push('\n');
+        }
+
+        output
+    }
 }
 
 fn main() {
-    println!("{:?}", Board::new());
+    let board = Board::new();
+    println!("{}", board.render());
 }
