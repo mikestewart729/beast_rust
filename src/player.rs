@@ -3,11 +3,15 @@ use crate::{BOARD_HEIGHT, BOARD_WIDTH, Coord, Direction, Tile, board::Board};
 #[derive(Debug)]
 pub struct Player {
     pub position: Coord,
+    pub lives: usize,
 }
 
 impl Player {
     pub fn new() -> Self {
-        Self { position: Coord { column: 0, row: 0 } }
+        Self { 
+            position: Coord { column: 0, row: 0 },
+            lives: 3,
+        }
     }
 
     fn get_next_position(position: Coord, direction: &Direction) -> Option<Coord> {

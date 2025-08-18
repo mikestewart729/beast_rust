@@ -106,6 +106,7 @@ impl Game {
     fn render(&self, reset: bool) -> String {
         const BORDER_SIZE: usize = 1;
         const FOOTER_SIZE: usize = 1;
+        const FOOTER_LEMGTH: usize = 11;
 
         let mut board = if reset {
             format!(
@@ -117,11 +118,12 @@ impl Game {
             String::new() 
         };
         board.push_str(&format!(
-            "{board}\n{footer:>width$}{level}",
+            "{board}\n{footer:>width$}{level}  Lives: {lives}",
             board = self.board.render(),
             footer = "Level: ",
             level = self.level,
-            width = BORDER_SIZE + BOARD_WIDTH * TILE_SIZE + BORDER_SIZE - FOOTER_SIZE,
+            lives = self.player.lives,
+            width = BORDER_SIZE + BOARD_WIDTH * TILE_SIZE + BORDER_SIZE - FOOTER_LEMGTH,
         ));
 
         board
