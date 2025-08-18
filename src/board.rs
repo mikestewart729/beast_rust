@@ -11,7 +11,7 @@ use crate::{
 
 #[derive(Debug)]
 pub struct Board {
-    buffer: [[Tile; BOARD_WIDTH]; BOARD_HEIGHT],
+    pub buffer: [[Tile; BOARD_WIDTH]; BOARD_HEIGHT],
 }
 
 impl Board {
@@ -27,7 +27,7 @@ impl Board {
 		Self { buffer }
     }
 
-    fn render(&self) -> String {
+    pub fn render(&self) -> String {
         let mut output = format!(
             "{ANSI_YELLOW}▛{}▜{ANSI_RESET}\n", 
             "▀".repeat(BOARD_WIDTH * TILE_SIZE)

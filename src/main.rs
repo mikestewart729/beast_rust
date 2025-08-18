@@ -1,9 +1,10 @@
 use std::io::{Read, stdin};
 
 mod board;
+mod player;
 mod raw_mode;
 
-use crate::{board::Board, raw_mode::RawMode};
+use crate::{board::Board, player::Player, raw_mode::RawMode};
 
 // Board Size constants
 pub const BOARD_WIDTH: usize = 39;
@@ -23,36 +24,46 @@ enum Tile {
     StaticBlock, // Others will be blocks that can't be moved "▓▓"
 }
 
+pub enum Direction {
+    Up,
+    Right,
+    Down,
+    Left,
+}
+
 #[derive(Debug)]
 struct Game{
     board: Board,
+    player: Player,
 }
 
 impl Game {
     fn new() -> Self {
         Self {
             board: Board::new(),
+            player: Player::new(),
         }
     }
 
-    fn play(&self) {
+    fn play(&mut self) {
         let stdin = stdin();
         let mut lock = stdin.lock();
         let mut buffer = [0_u8; 1];
+        println!("{}", self.board.render());
 
         while lock.read_exact(&mut buffer).is_ok() {
             match buffer[0] as char {
                 'w' => {
-                    println!("Go up!");
+                    self.player.advance(&mut self.board, Direction::Up);
                 },
                 'd' => {
-                    println!("Go right!");
+                    self.player.advance(&mut self.board, Direction::Right);
                 },
                 's' => {
-                    println!("Go down!");
+                    self.player.advance(&mut self.board, Direction::Down);
                 },
                 'a' => {
-                    println!("Go left!");
+                    self.player.advance(&mut self.board, Direction::Left);
                 },
                 'q' => {
                     println!("Goodbye!");
@@ -60,6 +71,8 @@ impl Game {
                 },
                 _ => {},
             }
+
+            println!("\x1B[{}F{}", BOARD_HEIGHT + 1 + 1, self.board.render());
         }
     }
 }
@@ -67,6 +80,6 @@ impl Game {
 fn main() {
     let _raw_mode = RawMode::enter();
 
-    let game = Game::new();
+    let mut game = Game::new();
     game.play();
 }
