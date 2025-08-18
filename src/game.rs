@@ -104,6 +104,18 @@ impl Game {
                         self.board[&self.player.position] = Tile::Player;
                         self.board[&block_to] = Tile::Block;
                     },
+                    AdvanceEffect::SquishBeast {
+                        player_to,
+                        beast_at,
+                    } => {
+                        self.board[&self.player.position] = Tile::Empty;
+                        self.player.position = player_to;
+                        self.board[&self.player.position] = Tile::Player;
+                        self.beasts.retain_mut(
+                            |beast| beast.position != beast_at
+                        );
+                        self.board[&beast_at] = Tile::Block;
+                    },
                 }
 
                 println!("{}", self.render(true));

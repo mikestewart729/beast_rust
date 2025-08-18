@@ -6,6 +6,7 @@ pub enum AdvanceEffect {
     Stay,
     MoveIntoTile(Coord),
     MoveAndPushBlock { player_to: Coord, block_to: Coord },
+    SquishBeast { player_to: Coord, beast_at: Coord},
 }
 
 #[derive(Debug)]
@@ -90,7 +91,31 @@ impl Player {
                                         block_to: current_position,
                                     };
                                 },
-                                Tile::StaticBlock | Tile::Player | Tile::CommonBeast => {
+                                Tile::CommonBeast => {
+                                    if let Some(behind_beast) = 
+                                        Self::get_next_position(current_position, direction)
+                                    {
+                                        if matches!(
+                                            board[&behind_beast],
+                                            Tile::Block | Tile::StaticBlock
+                                        ) {
+                                            // Squishing the beast between blocks, static or normal
+                                            // ◀▶░░├┤░░
+                                            return AdvanceEffect::SquishBeast {
+                                                player_to: first_position,
+                                                beast_at: current_position,
+                                            };
+                                        }
+                                    } else {
+                                        // Squishing the beast between a block and the border
+                                        // ◀▶░░├┤▐
+                                        return AdvanceEffect::SquishBeast {
+                                            player_to: first_position,
+                                            beast_at: current_position,
+                                        };
+                                    }
+                                },
+                                Tile::StaticBlock | Tile::Player => {
                                     return AdvanceEffect::Stay;
                                  },
                             }
