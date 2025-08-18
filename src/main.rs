@@ -16,7 +16,7 @@ pub const ANSI_CYAN: &str = "\x1B[36m";
 pub const ANSI_RESET: &str = "\x1B[39m";
 
 #[derive(Copy, Clone, Debug)]
-enum Tile {
+pub enum Tile {
     Empty,       // There will be empty spaces on our board "  "
     Player,      // We will need the player "◀▶"
     Block,       // Some tiles will be blocks "░░"
@@ -28,6 +28,12 @@ pub enum Direction {
     Right,
     Down,
     Left,
+}
+
+#[derive(Debug)]
+pub struct Coord {
+    column: usize,
+    row: usize,
 }
 
 fn main() {

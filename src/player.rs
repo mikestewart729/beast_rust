@@ -1,41 +1,41 @@
-use crate::{BOARD_HEIGHT, BOARD_WIDTH, Direction, Tile, board::Board};
+use crate::{BOARD_HEIGHT, BOARD_WIDTH, Coord, Direction, Tile, board::Board};
 
 #[derive(Debug)]
 pub struct Player {
-    position: (usize, usize),
+    position: Coord,
 }
 
 impl Player {
     pub fn new() -> Self {
-        Self { position: (0, 0) }
+        Self { position: Coord { column: 0, row: 0 } }
     }
 
     pub fn advance(&mut self, board: &mut Board, direction: Direction) {
-        board.buffer[self.position.1][self.position.0] = Tile::Empty;
+        board[&self.position] = Tile::Empty;
 
         match direction {
             Direction::Up => {
-                if self.position.1 > 0 {
-                    self.position.1 -= 1
+                if self.position.row > 0 {
+                    self.position.row -= 1
                 }
             }, // 0, 0 is in upper left corner
             Direction::Right => {
-                if self.position.0 < BOARD_WIDTH - 1 {
-                    self.position.0 += 1
+                if self.position.column < BOARD_WIDTH - 1 {
+                    self.position.column += 1
                 }
             },
             Direction::Down => {
-                if self.position.1 < BOARD_HEIGHT - 1 {
-                    self.position.1 += 1
+                if self.position.row < BOARD_HEIGHT - 1 {
+                    self.position.row += 1
                 }
             },
             Direction::Left => {
-                if self.position.0 > 0 {
-                    self.position.0 -= 1
+                if self.position.column > 0 {
+                    self.position.column -= 1
                 }
             },
         }
 
-        board.buffer[self.position.1][self.position.0] = Tile::Player;
+        board[&self.position] = Tile::Player;
     }
 }

@@ -1,4 +1,5 @@
 use rand::seq::SliceRandom;
+use std::ops::{Index, IndexMut};
 
 use crate::{
     ANSI_CYAN, 
@@ -7,6 +8,7 @@ use crate::{
     ANSI_YELLOW, 
     BOARD_HEIGHT, 
     BOARD_WIDTH, 
+    Coord,
     TILE_SIZE, 
     Tile,
 };
@@ -16,16 +18,32 @@ pub struct Board {
     pub buffer: [[Tile; BOARD_WIDTH]; BOARD_HEIGHT],
 }
 
+impl Index<&Coord> for Board {
+    type Output = Tile;
+
+    fn index(&self, coord: &Coord) -> &Self::Output {
+        &self.buffer[coord.row][coord.column]
+    }
+}
+
+impl IndexMut<&Coord> for Board {
+    fn index_mut(&mut self, coord: &Coord) -> &mut Self::Output {
+        &mut self.buffer[coord.row][coord.column]
+    }
+}
+
 impl Board {
     pub fn new() -> Self {
         let mut buffer = [[Tile::Empty; BOARD_WIDTH]; BOARD_HEIGHT];
 
         let mut all_coords = (0..BOARD_HEIGHT)
             .flat_map(
-                |row| (0..BOARD_WIDTH).map(move |column| (column, row))
+                |row| (0..BOARD_WIDTH).map(
+                    move |column| Coord { column, row }
+                )
             )
-            .filter(|coord| !(coord.0 == 0 && coord.1 == 0))
-            .collect::<Vec<(usize, usize)>>();
+            .filter(|coord| !(coord.column == 0 && coord.row == 0))
+            .collect::<Vec<Coord>>();
 
         let mut rng = rand::rng();
         all_coords.shuffle(&mut rng);
@@ -36,14 +54,14 @@ impl Board {
             let coord = all_coords.pop().expect(
                 "We tried to place more blocks than there are available spaces on the board",
             );
-            buffer[coord.1][coord.0] = Tile::Block;
+            buffer[coord.row][coord.column] = Tile::Block;
         }
 
         for _ in 0..5 {
             let coord = all_coords.pop().expect(
                 "We tried to place more static blocks than there are available spaces on the board",
             );
-            buffer[coord.1][coord.0] = Tile::StaticBlock;
+            buffer[coord.row][coord.column] = Tile::StaticBlock;
         }
 
 		Self { buffer }
