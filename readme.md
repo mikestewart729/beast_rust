@@ -1,0 +1,1 @@
+This repository follows the tutorial to build a game like "Beast" from 1984. The tutorial can be found [here](https://dominik-wilkowski.com/posts/learning-rust-by-building-the-old-terminal-game-beast-from-1984-part-1/), and is written by Dominik Wilkowski. I will follow the tutorial and then add any features that strike my fancy. 
