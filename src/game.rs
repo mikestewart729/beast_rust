@@ -54,7 +54,7 @@ impl Game {
         let mut last_tick = Instant::now();
         println!("{}", self.render(false));
 
-        loop {
+        'game_loop: loop {
             if let Ok(byte) = self.input_receiver.try_recv() {
                 match byte as char {
                     'w' => {
@@ -92,7 +92,16 @@ impl Game {
                                 self.board[&new_position] = Tile::CommonBeast;
                             },
                             Tile::Player => {
-                                todo!("The beast just killed the player");
+                                self.board[&beast.position] = Tile::Empty;
+                                beast.position = new_position;
+                                self.board[&new_position] = Tile::CommonBeast;
+                                self.player.lives -= 1;
+                                if self.player.lives == 0 {
+                                    println!("Game Over!");
+                                    break 'game_loop;
+                                } else {
+                                    self.player.respawn(&mut self.board);
+                                }
                             },
                             _ => {},
                         }

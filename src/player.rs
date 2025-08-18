@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::{BOARD_HEIGHT, BOARD_WIDTH, Coord, Direction, Tile, board::Board};
 
 #[derive(Debug)]
@@ -93,5 +95,20 @@ impl Player {
                 },
             }
         }
+    }
+
+    pub fn respawn(&mut self, board: &mut Board) {
+        let mut new_position = self.position;
+
+        let mut rng = rand::rng();
+        while board[&new_position] != Tile::Empty {
+            new_position = Coord {
+                column: rng.random_range(0..BOARD_WIDTH),
+                row: rng.random_range(0..BOARD_HEIGHT),
+            };
+        }
+
+        self.position = new_position;
+        board[&new_position] = Tile::Player;
     }
 }
