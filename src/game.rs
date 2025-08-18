@@ -80,11 +80,20 @@ impl Game {
                     AdvanceEffect::Stay => {},
                     AdvanceEffect::MoveIntoTile(player_position) => {
                         if self.board[&player_position] == Tile::CommonBeast {
-                            todo!("The player ran into a beast and died!");
+                            self.player.lives -= 1;
+                            if self.player.lives > 0 {
+                                let new_position = self.player.respawn(&self.board);
+                                self.board[&self.player.position] = Tile::Empty;
+                                self.player.position = new_position;
+                                self.board[&self.player.position] = Tile::Player;
+                            } else {
+                                self.board[&self.player.position] = Tile::Empty;
+                            }
+                        } else {
+                            self.board[&self.player.position] = Tile::Empty;
+                            self.player.position = player_position;
+                            self.board[&self.player.position] = Tile::Player;
                         }
-                        self.board[&self.player.position] = Tile::Empty;
-                        self.player.position = player_position;
-                        self.board[&self.player.position] = Tile::Player;
                     },
                     AdvanceEffect::MoveAndPushBlock {
                         player_to,
@@ -117,10 +126,8 @@ impl Game {
                                 beast.position = new_position;
                                 self.board[&new_position] = Tile::CommonBeast;
                                 self.player.lives -= 1;
-                                if self.player.lives == 0 {
-                                    println!("Game Over!");
-                                    break 'game_loop;
-                                } else {
+                                
+                                if self.player.lives > 0 {
                                     let new_position = self.player.respawn(&self.board);
                                     self.player.position = new_position;
                                     self.board[&self.player.position] = Tile::Player;
@@ -131,6 +138,11 @@ impl Game {
                     }
                 }
                 println!("{}", self.render(true));
+            }
+
+            if self.player.lives == 0 {
+                println!("Game Over!");
+                break 'game_loop;
             }
         }
     }
