@@ -11,31 +11,41 @@ impl Player {
     }
 
     pub fn advance(&mut self, board: &mut Board, direction: Direction) {
-        board[&self.position] = Tile::Empty;
+        let mut next_position = self.position;
 
         match direction {
             Direction::Up => {
-                if self.position.row > 0 {
-                    self.position.row -= 1
+                if next_position.row > 0 {
+                    next_position.row -= 1
                 }
             }, // 0, 0 is in upper left corner
             Direction::Right => {
-                if self.position.column < BOARD_WIDTH - 1 {
-                    self.position.column += 1
+                if next_position.column < BOARD_WIDTH - 1 {
+                    next_position.column += 1
                 }
             },
             Direction::Down => {
-                if self.position.row < BOARD_HEIGHT - 1 {
-                    self.position.row += 1
+                if next_position.row < BOARD_HEIGHT - 1 {
+                    next_position.row += 1
                 }
             },
             Direction::Left => {
-                if self.position.column > 0 {
-                    self.position.column -= 1
+                if next_position.column > 0 {
+                    next_position.column -= 1
                 }
             },
         }
 
-        board[&self.position] = Tile::Player;
+        match board[&next_position] {
+            Tile::Empty => {
+                board[&self.position] = Tile::Empty;
+                self.position = next_position;
+                board[&next_position] = Tile::Player;
+            },
+            Tile::Block => {
+                // TODO: Need to move the block and any behind it
+            },
+            Tile::Player | Tile::StaticBlock => {},
+        }
     }
 }
