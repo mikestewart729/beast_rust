@@ -1,3 +1,5 @@
+use rand::seq::SliceRandom;
+
 use crate::{
     ANSI_CYAN, 
     ANSI_GREEN, 
@@ -18,11 +20,31 @@ impl Board {
     pub fn new() -> Self {
         let mut buffer = [[Tile::Empty; BOARD_WIDTH]; BOARD_HEIGHT];
 
+        let mut all_coords = (0..BOARD_HEIGHT)
+            .flat_map(
+                |row| (0..BOARD_WIDTH).map(move |column| (column, row))
+            )
+            .filter(|coord| !(coord.0 == 0 && coord.1 == 0))
+            .collect::<Vec<(usize, usize)>>();
+
+        let mut rng = rand::rng();
+        all_coords.shuffle(&mut rng);
+
         buffer[0][0] = Tile::Player;
-		buffer[2][5] = Tile::Block;
-		buffer[2][6] = Tile::Block;
-		buffer[2][7] = Tile::Block;
-		buffer[3][6] = Tile::StaticBlock;
+
+        for _ in 0..50 {
+            let coord = all_coords.pop().expect(
+                "We tried to place more blocks than there are available spaces on the board",
+            );
+            buffer[coord.1][coord.0] = Tile::Block;
+        }
+
+        for _ in 0..5 {
+            let coord = all_coords.pop().expect(
+                "We tried to place more static blocks than there are available spaces on the board",
+            );
+            buffer[coord.1][coord.0] = Tile::StaticBlock;
+        }
 
 		Self { buffer }
     }
