@@ -8,6 +8,7 @@ use std::{
 use crate::{
     BOARD_HEIGHT, 
     BOARD_WIDTH, 
+    Coord,
     Direction, 
     TILE_SIZE, 
     Tile,
@@ -28,7 +29,7 @@ pub struct Game{
 
 impl Game {
     pub fn new() -> Self {
-        let (board, beasts) = Board::new();
+        let (board, beasts) = Board::new(&Level::One);
         let (input_sender, input_receiver) = mpsc::channel::<u8>();
         let stdin = stdin();
         thread::spawn(move || {
@@ -155,6 +156,19 @@ impl Game {
             if self.player.lives == 0 {
                 println!("Game Over!");
                 break 'game_loop;
+            }
+
+            if self.beasts.is_empty() {
+                if let Some(level) = self.level.next() {
+                    let (board, beasts) = Board::new(&level);
+                    self.board = board;
+                    self.beasts = beasts;
+                    self.level = level;
+                    self.player.position = Coord { column: 0, row: 0 };
+                } else {
+                    println!("You won!");
+                    break 'game_loop;
+                }
             }
         }
     }

@@ -44,4 +44,12 @@ impl Level {
             },
         }
     }
+
+    pub fn next(&self) -> Option<Level> {
+        match self {
+            Level::One => Some(Level::Two),
+            Level::Two => Some(Level::Three),
+            Level::Three => None,
+        }
+    }
 }
